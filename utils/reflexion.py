@@ -5,32 +5,33 @@ from utils.logger import get_logger
 from utils.tools import extract_code
 from utils.prompt import CODE_PROMPT_TEMPLATE, REFLEXION_PROMPT_TEMPLATE
 
-MAX_TRIALS=3
+# for independent runs
 TASK_ID = "HumanEval/2"
+MAX_TRIALS=3
 
 log = get_logger()
 samples = []
 
 problems = read_problems()
-task_data = problems[TASK_ID]
-task_prompt = task_data["prompt"]
+# task_data = problems[TASK_ID]
+# task_prompt = task_data["prompt"]
 
-def human_eval_loop(llm):
+def human_eval_loop(llm, MAX_TRIALS=MAX_TRIALS):
     for task_id in problems:
         task_data = problems[task_id]
         task_prompt = task_data["prompt"]
-        reflexion_run(llm, task_id, task_data, task_prompt)
+        reflexion_run(llm, task_id, task_data, task_prompt, MAX_TRIALS)
     
     write_jsonl("reflexion_samples.jsonl",samples)
 
-def reflexion_run(llm, task_id, task_data, task_prompt):
+def reflexion_run(llm, task_id, task_data, task_prompt, max_trials):
     current_reflection = ""
     is_solved = False
     all_attempts = []
 
     log.info("ATTEMPTING PROBLEM:\n%s",task_prompt)
 
-    for trial_num in range(1, MAX_TRIALS+1):
+    for trial_num in range(1, max_trials+1):
         log.info("------ TRIAL %s ------", trial_num)
 
         # action phase
@@ -48,7 +49,7 @@ def reflexion_run(llm, task_id, task_data, task_prompt):
         check = check_correctness(
             task_data,
             generation,
-            timeout=999
+            timeout=60
         )
 
         log.debug("CHECK CORRECTNESS:\n%s\n",check)
@@ -61,7 +62,7 @@ def reflexion_run(llm, task_id, task_data, task_prompt):
 
         # check result
         if check["passed"]:
-            print(f"SUCCESS! Problem {TASK_ID} solved in {trial_num} trial(s).")
+            print(f"SUCCESS! Problem {task_id} solved in {trial_num} trial(s).")
             is_solved = True
             break
         else:
@@ -69,7 +70,7 @@ def reflexion_run(llm, task_id, task_data, task_prompt):
             log.warning("FAILED TEST: %s...", error[:200])
 
         # reflection
-        if trial_num < MAX_TRIALS:
+        if trial_num < max_trials:
             reflection_prompt = REFLEXION_PROMPT_TEMPLATE.format(
                 attempt_code=generation,
                 test_error=error,
@@ -81,5 +82,5 @@ def reflexion_run(llm, task_id, task_data, task_prompt):
     if is_solved:
         samples.append({'task_id':task_id, 'completion':generation, 'passed':True})
     else:
-        log.warning("FINAL FAILURE. Problem %s was not solved within %s trials.", TASK_ID, MAX_TRIALS)
+        log.warning("FINAL FAILURE. Problem %s was not solved within %s trials.", task_id, max_trials)
         samples.append({'task_id':task_id, 'last_completion':generation, 'passed':False})
