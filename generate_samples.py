@@ -1,9 +1,6 @@
-from utils.logger import get_logger
 from utils.local_llm import LocalLLM
-from utils.reflexion import human_eval_loop
-# from utils.vanilla import vanilla_run
-
-log = get_logger()
+from runners.reflexion import human_eval_loop
+# from runners.vanilla import vanilla_run
 
 # --- LLM Specifications ---
 

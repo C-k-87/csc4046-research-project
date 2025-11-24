@@ -62,7 +62,7 @@ def reflexion_run(llm, task_id, task_data, task_prompt, max_trials):
 
         # check result
         if check["passed"]:
-            print(f"SUCCESS! Problem {task_id} solved in {trial_num} trial(s).")
+            log.info(f"SUCCESS! Problem %s solved in %s trial(s).",task_id, trial_num)
             is_solved = True
             break
         else:
