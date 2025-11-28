@@ -1,4 +1,10 @@
-import os
+if __name__=="__main__":
+    print("Adding current working directory to sys.path for module imports.")
+    import os, sys
+    from pathlib import Path
+
+    sys.path.append(str(Path.cwd()))
+
 import json
 from human_eval.human_eval.data import read_problems, write_jsonl
 from human_eval.human_eval.execution import check_correctness
@@ -8,27 +14,21 @@ from utils.tools import extract_code, extract_reflection
 from utils.vector_store import add_reflection, search
 from utils.prompt import CODE_PROMPT_TEMPLATE, REFLEXION_PROMPT_TEMPLATE
 
-# for independent runs
-TASK_ID = "HumanEval/2"
-MAX_TRIALS=3
-
 log = get_logger()
 samples = []
 
 problems = read_problems()
-task_data = problems[TASK_ID]
-task_prompt = task_data["prompt"]
 
-def human_eval_loop(llm, log_results, vector_memory, MAX_TRIALS=MAX_TRIALS):
+def human_eval_loop(llm, log_results, vector_memory, max_trials):
     for task_id in problems:
         task_data = problems[task_id]
         task_prompt = task_data["prompt"]
-        reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, MAX_TRIALS)
+        reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, max_trials)
     
         if log_results:
             os.makedirs("runtime_logs", exist_ok=True)
             with open("runtime_logs/reflexion_samples_vector.jsonl", "a") as run_log:
-                results = [d for d in samples[-MAX_TRIALS:] if d.get("task_id")==samples[-1].get("task_id")]
+                results = [d for d in samples[-max_trials:] if d.get("task_id")==samples[-1].get("task_id")]
                 log_entry = "\n".join(json.dumps(entry) for entry in results)
                 run_log.write(log_entry+",\n")
                 run_log.close()
@@ -101,4 +101,26 @@ def reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, max_trial
     
     if not is_solved:
         log.warning("FINAL FAILURE. Problem %s was not solved within %s trials.", task_id, max_trials)
-        
+    
+if __name__=="__main__":
+    log.info("Running reflexion runner standalone.")
+    from utils.local_llm import LocalLLM
+
+    llm_model = "gguf/Phi-3-mini-4k-instruct-q4.gguf"
+    n_ctx=700
+    n_gpu_layers=999
+    verbosity = True
+
+    llm = LocalLLM(llm_model, n_ctx, n_gpu_layers, verbosity)
+
+    # for independent runs
+    TASK_ID = "HumanEval/2"
+    MAX_TRIALS=3
+
+    reflexion_run(
+        llm, TASK_ID,
+        task_data=problems[TASK_ID],
+        task_prompt=problems[TASK_ID]["prompt"],
+        vector_memory=True,
+        max_trials=MAX_TRIALS
+    )
