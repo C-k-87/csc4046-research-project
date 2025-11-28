@@ -137,3 +137,6 @@ scratch/
 .vscode/
 
 .DS_Store/
+
+archive/
+transformer/

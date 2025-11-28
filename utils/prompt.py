@@ -5,7 +5,7 @@ CODE_PROMPT_TEMPLATE = """
 <|system|>
 You are an expert Python programmer. Your task is to implement the function described below.
 Your response MUST be ONLY the function implementation ensuring the retention of orginal imports defined in the problem. Do not include any explanations, examples, or tests.
-The function signature is already provided. Format your answer with the python code markdown (```python ```)
+The function signature is already provided. Make sure to wrap your answer with the python code markdown (```python ```).
 
 <|user|>
 function to implement:

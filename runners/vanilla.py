@@ -1,3 +1,4 @@
+import os
 from human_eval.human_eval.data import write_jsonl, stream_jsonl, read_problems
 from human_eval.human_eval.execution import check_correctness
 from tqdm import tqdm
@@ -19,7 +20,11 @@ def vanilla_run(llm, num_samples_per_task=MAX_TRIALS):
         for _ in range(num_samples_per_task)
     ]
 
-    write_jsonl("samples.jsonl", samples)
+    with open("runtime_logs/vanilla_samples.jsonl", "a") as run_log:
+                os.makedirs("runtime_logs", exist_ok=True)
+                entry = str(samples[len(samples)-1])
+                run_log.write(entry+",\n")
+                run_log.close()
 
     log.info("VANILLA RUN | finished generation")
 

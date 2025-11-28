@@ -1,8 +1,11 @@
+import os
+import json
 from human_eval.human_eval.data import read_problems, write_jsonl
 from human_eval.human_eval.execution import check_correctness
 
 from utils.logger import get_logger
-from utils.tools import extract_code
+from utils.tools import extract_code, extract_reflection
+from utils.vector_store import add_reflection, search
 from utils.prompt import CODE_PROMPT_TEMPLATE, REFLEXION_PROMPT_TEMPLATE
 
 # for independent runs
@@ -13,18 +16,24 @@ log = get_logger()
 samples = []
 
 problems = read_problems()
-# task_data = problems[TASK_ID]
-# task_prompt = task_data["prompt"]
+task_data = problems[TASK_ID]
+task_prompt = task_data["prompt"]
 
-def human_eval_loop(llm, MAX_TRIALS=MAX_TRIALS):
+def human_eval_loop(llm, log_results, vector_memory, MAX_TRIALS=MAX_TRIALS):
     for task_id in problems:
         task_data = problems[task_id]
         task_prompt = task_data["prompt"]
-        reflexion_run(llm, task_id, task_data, task_prompt, MAX_TRIALS)
+        reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, MAX_TRIALS)
     
-    write_jsonl("reflexion_samples.jsonl",samples)
+        if log_results:
+            os.makedirs("runtime_logs", exist_ok=True)
+            with open("runtime_logs/reflexion_samples_vector.jsonl", "a") as run_log:
+                results = [d for d in samples[-MAX_TRIALS:] if d.get("task_id")==samples[-1].get("task_id")]
+                log_entry = "\n".join(json.dumps(entry) for entry in results)
+                run_log.write(log_entry+",\n")
+                run_log.close()
 
-def reflexion_run(llm, task_id, task_data, task_prompt, max_trials):
+def reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, max_trials):
     current_reflection = ""
     is_solved = False
     all_attempts = []
@@ -36,14 +45,14 @@ def reflexion_run(llm, task_id, task_data, task_prompt, max_trials):
 
         # action phase
         action_prompt = CODE_PROMPT_TEMPLATE.format(
-            reflection=f"previous attempt: {current_reflection}\n" if current_reflection else "",
+            reflection=f"previous reflections: {current_reflection}\n" if current_reflection else "",
             task_prompt =task_prompt
         ).strip()
         log.info("ACTION PROMPT: ---------------------------\n %s \n", action_prompt)
 
-        generation = llm.generate_one_completion(action_prompt, max_tokens=300)
+        generation = llm.generate_one_completion(action_prompt, max_tokens=500)
+        log.info("NON EXTRACTED CODE:--------- \n%s\n-----------",generation)
         generation = extract_code(generation)
-        log.info("GENERATED CODE: ---------------------------\n%s\n",generation)
 
         # evaluation phase
         check = check_correctness(
@@ -52,7 +61,7 @@ def reflexion_run(llm, task_id, task_data, task_prompt, max_trials):
             timeout=60
         )
 
-        log.debug("CHECK CORRECTNESS:\n%s\n",check)
+        log.info("CHECK CORRECTNESS:\n%s\n",check)
 
         all_attempts.append({
             "trial": trial_num,
@@ -64,10 +73,12 @@ def reflexion_run(llm, task_id, task_data, task_prompt, max_trials):
         if check["passed"]:
             log.info(f"SUCCESS! Problem %s solved in %s trial(s).",task_id, trial_num)
             is_solved = True
+            samples.append({'task_id':task_id, 'completion':generation, 'passed':True})
             break
         else:
             error = check.get("result", "Tests failed with an unknown error.")
             log.warning("FAILED TEST: %s...", error[:200])
+            samples.append({'task_id':task_id, 'last_completion':generation, 'error-200':error[:200], 'passed':False})
 
         # reflection
         if trial_num < max_trials:
@@ -76,11 +87,18 @@ def reflexion_run(llm, task_id, task_data, task_prompt, max_trials):
                 test_error=error,
             )
 
-            current_reflection = llm.generate_one_completion(reflection_prompt, max_tokens=500, stop=["###"])
-            log.info("GENERATED REFLECTION:\n %s\n",current_reflection)
+            reflection = llm.generate_one_completion(reflection_prompt, max_tokens=500, stop=["###"])
+            log.info("Generated Reflection\n%s\n",reflection)
+            reflection = extract_reflection(reflection)
+
+            if vector_memory:
+                add_reflection(reflection)
+                current_reflection = '\n'.join(search(reflection)["documents"][0])
+            else:
+                current_reflection = reflection
+            
+            log.info("RETRIEVED REFLECTION:\n %s\n",current_reflection)
     
-    if is_solved:
-        samples.append({'task_id':task_id, 'completion':generation, 'passed':True})
-    else:
+    if not is_solved:
         log.warning("FINAL FAILURE. Problem %s was not solved within %s trials.", task_id, max_trials)
-        samples.append({'task_id':task_id, 'last_completion':generation, 'passed':False})
+        

@@ -13,6 +13,8 @@ def extract_code(generation):
         log.info("CODE EXTRACTION | MATCHED PATTERN for python MD")
         return match.group(1).strip()
     
+    # We could try to implement a few more possibilities to extract code from prompts.
+    # Depending on the model we can get quite random answers
     # Try code blocks with ===
     pattern = r'(?:[\s\S]*)?===([\s\S]*)\s(?:[\s\S]*)'
     match = re.search(pattern, generation)
@@ -33,9 +35,7 @@ def extract_code(generation):
     
     # If we found at least 2 fences, extract content between first pair
     if len(fence_indices) >= 2:
-        start = fence_indices[0]
-        end = fence_indices[1]
-        code_lines = lines[start+1:end]
+        code_lines = lines[fence_indices[0]+1:fence_indices[1]]
         
         # Remove language identifier if present on first line
         if code_lines and code_lines[0].strip().lower() in ['python', 'py']:
@@ -46,3 +46,14 @@ def extract_code(generation):
     # If no fences found, return the text as-is (stripped)
     log.warning("CODE EXTRACTOR MATCHED NO PATTERNS")
     return generation.strip()
+
+def extract_reflection(reflection):
+    pattern = r'^([^\n]+(?:\n(?!\n)[^\n]+)*)'
+    match = re.match(pattern, reflection)
+
+    if match:
+        log.info("REFLECTION EXTRACTION | MATCHED REFLECTION")
+        return match.group(1).strip()
+    else:
+        log.warning("REFLECTION EXTRACTION | NO MATCH")
+        return reflection
