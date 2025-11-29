@@ -9,6 +9,7 @@ from sentence_transformers import SentenceTransformer
 data_path = Path("data/entries.jsonl")
 # model = SentenceTransformer("all-MiniLM-L6-v2")
 model = SentenceTransformer("transformer/model")
+K_VALUE=3
 
 chroma_client = chromadb.Client(
     Settings(
@@ -46,7 +47,7 @@ def add_reflection(text, metadata={'data':'none'}):
     
     return id
 
-def search(query, k=5):
+def search(query, k=K_VALUE):
     res = collection.query(
         query_embeddings=[embed(query)],
         n_results=k

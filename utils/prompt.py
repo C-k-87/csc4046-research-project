@@ -11,12 +11,13 @@ The function signature is already provided. Make sure to wrap your answer with t
 function to implement:
 {task_prompt}
 
-<|assistant|>
 {reflection}
+<|assistant|>
 """
 
 # B. The REFLECTION Prompt (for generating feedback after a failed test)
 REFLEXION_PROMPT_TEMPLATE = """
+<|user|>
 Your previous attempt to solve the function:
 {attempt_code}
 
@@ -26,5 +27,5 @@ The unit tests failed with the following traceback/error:
 Analyze the failed attempt and the error. Provide a concise, one-paragraph reflection on the likely cause of the bug and a high-level strategy for fixing it.
 Your reflection will be used to guide your next attempt.
 
-Reflection:
+<|assistant|>
 """
