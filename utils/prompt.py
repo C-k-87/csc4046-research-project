@@ -17,8 +17,13 @@ function to implement:
 
 # B. The REFLECTION Prompt (for generating feedback after a failed test)
 REFLEXION_PROMPT_TEMPLATE = """
+<|system|>
+You are an expert Python programmer. Your task is to analyze faulty code and advise on fixes.
+Your response MUST be ONLY a single solution to the problem. Do not include any examples, or tests.
+The faulty code and error are provided.
+
 <|user|>
-Your previous attempt to solve the function:
+The previous attempt to solve the function:
 {attempt_code}
 
 The unit tests failed with the following traceback/error:

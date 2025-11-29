@@ -21,21 +21,37 @@ samples = []
 problems = read_problems()
 
 def human_eval_loop(llm, log_results, vector_memory, max_trials):
-    for task_id in problems:
-        task_data = problems[task_id]
-        task_prompt = task_data["prompt"]
-        reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, max_trials)
-    
-        if log_results:
-            os.makedirs("runtime_logs", exist_ok=True)
-            with open(
-                    "runtime_logs/reflexion_samples_vector.jsonl" if vector_memory else "runtime_logs/reflexion_samples_vector.jsonl",
-                    "a"
-                ) as run_log:
+    if log_results:
+        os.makedirs("runtime_logs", exist_ok=True)
+        with open(
+            "runtime_logs/reflexion_samples_vector.jsonl" if vector_memory else "runtime_logs/reflexion_samples.jsonl",
+            "a"
+        ) as run_log:
+        
+            for task_id in problems:
+                task_data = problems[task_id]
+                task_prompt = task_data["prompt"]
+                reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, max_trials)
+        
                 results = [d for d in samples[-max_trials:] if d.get("task_id")==samples[-1].get("task_id")]
                 log_entry = "\n".join(json.dumps(entry) for entry in results)
                 run_log.write(log_entry+",\n")
-                run_log.close()
+                
+            run_specs = json.dumps({
+                "model":llm.get_llm().metadata['general.name'],
+                "max_trials":max_trials,
+                "passed":len([d for d in samples if d.get("passed")==True]),
+                "failed":len(problems)-len([d for d in samples if d.get("passed")==True])
+            })+"\n"
+
+            run_log.write(run_specs)
+
+    else:   # no logging to file for debugging purposes
+        for task_id in problems:
+            task_data = problems[task_id]
+            task_prompt = task_data["prompt"]
+            reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, max_trials)
+
 
 def reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, max_trials):
     current_reflection = ""
@@ -113,18 +129,20 @@ if __name__=="__main__":
     llm_model = "gguf/Phi-3-mini-4k-instruct-q4.gguf"
     n_ctx=700
     n_gpu_layers=999
-    verbosity = True
+    verbosity = False
 
     llm = LocalLLM(llm_model, n_ctx, n_gpu_layers, verbosity)
 
     # for independent runs
-    TASK_ID = "HumanEval/2"
+    task_id_list = [f"HumanEval/{i}" for i in range(100,110)]
+    print(task_id_list)
     MAX_TRIALS=3
 
-    reflexion_run(
-        llm, TASK_ID,
-        task_data=problems[TASK_ID],
-        task_prompt=problems[TASK_ID]["prompt"],
-        vector_memory=True,
-        max_trials=MAX_TRIALS
-    )
+    for TASK_ID in task_id_list:
+        reflexion_run(
+            llm, TASK_ID,
+            task_data=problems[TASK_ID],
+            task_prompt=problems[TASK_ID]["prompt"],
+            vector_memory=True,
+            max_trials=MAX_TRIALS
+        )
