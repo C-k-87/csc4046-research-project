@@ -1,10 +1,11 @@
 if __name__=="__main__":
     print("Adding current working directory to sys.path for module imports.")
-    import os, sys
+    import sys
     from pathlib import Path
 
     sys.path.append(str(Path.cwd()))
 
+import os
 import json
 from human_eval.human_eval.data import read_problems, write_jsonl
 from human_eval.human_eval.execution import check_correctness
@@ -27,7 +28,10 @@ def human_eval_loop(llm, log_results, vector_memory, max_trials):
     
         if log_results:
             os.makedirs("runtime_logs", exist_ok=True)
-            with open("runtime_logs/reflexion_samples_vector.jsonl", "a") as run_log:
+            with open(
+                    "runtime_logs/reflexion_samples_vector.jsonl" if vector_memory else "runtime_logs/reflexion_samples_vector.jsonl",
+                    "a"
+                ) as run_log:
                 results = [d for d in samples[-max_trials:] if d.get("task_id")==samples[-1].get("task_id")]
                 log_entry = "\n".join(json.dumps(entry) for entry in results)
                 run_log.write(log_entry+",\n")

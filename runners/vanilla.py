@@ -4,31 +4,11 @@ from human_eval.human_eval.execution import check_correctness
 from tqdm import tqdm
 
 from utils.logger import get_logger
-
-MAX_TRIALS=3
+from utils.tools import extract_code
 
 log = get_logger()
 problems = read_problems()
 samples_file = stream_jsonl("samples/samples.jsonl")
-
-def vanilla_run(llm, num_samples_per_task=MAX_TRIALS):
-    log.info("initiating vanilla run with llm %s (num samples = %s ", llm, num_samples_per_task)
-    
-    samples = [
-        dict(task_id=task_id, completion=llm.generate_one_completion(problems[task_id]["prompt"]))
-        for task_id in tqdm(problems)
-        for _ in range(num_samples_per_task)
-    ]
-
-    with open("runtime_logs/vanilla_samples.jsonl", "a") as run_log:
-                os.makedirs("runtime_logs", exist_ok=True)
-                entry = str(samples[len(samples)-1])
-                run_log.write(entry+",\n")
-                run_log.close()
-
-    log.info("VANILLA RUN | finished generation")
-
-    evaluate_samples(samples)
 
 def evaluate_samples(samples=samples_file):
     log.info("SAMPLE EVALUATION | Initiating...")
@@ -60,3 +40,27 @@ def evaluate_samples(samples=samples_file):
     log.info("EVALUATION | Finished sample evaluation\n")
     log.info("Passed: %s \tFailed:%s\n",passed,failed)
     write_jsonl("samples_results.jsonl", samples_check)
+
+def vanilla_run(llm, max_trials):
+    log.info("initiating vanilla run with num samples = %s ", max_trials)
+    
+    samples = [
+        dict(
+             task_id=task_id,
+             completion=extract_code(
+                  llm.generate_one_completion(problems[task_id]["prompt"], max_tokens=500)
+                )
+            )
+        for task_id in tqdm(problems)
+        for _ in range(max_trials)
+    ]
+
+    with open("runtime_logs/vanilla_samples.jsonl", "a") as run_log:
+                os.makedirs("runtime_logs", exist_ok=True)
+                entry = str(samples[len(samples)-1])
+                run_log.write(entry+",\n")
+                run_log.close()
+
+    log.info("VANILLA RUN | finished generation")
+
+    evaluate_samples(samples)
