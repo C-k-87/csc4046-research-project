@@ -13,7 +13,7 @@ class LocalLLM():
         try:
             self._llm = Llama(model_path=llm_model, n_ctx=n_ctx, n_gpu_layers=n_gpu_layers, n_threads=4, verbose=verbose)
         except Exception as e:
-            log.error("Error loading LLM: ", e)
+            log.error("Error loading LLM: %s", e)
             sys.exit(1)
 
     def get_llm(self):

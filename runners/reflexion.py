@@ -7,11 +7,11 @@ if __name__=="__main__":
 
 import os
 import json
-from human_eval.human_eval.data import read_problems, write_jsonl
+from human_eval.human_eval.data import read_problems
 from human_eval.human_eval.execution import check_correctness
 
 from utils.logger import get_logger
-from utils.tools import extract_code, extract_reflection
+from utils.tools import extract_code, extract_reflection, get_top_k_bugs, create_injection
 from utils.vector_store import add_reflection, search
 from utils.prompt import CODE_PROMPT_TEMPLATE, REFLEXION_PROMPT_TEMPLATE
 
@@ -28,7 +28,8 @@ def human_eval_loop(llm, log_results, vector_memory, max_trials):
             "a"
         ) as run_log:
         
-            for task_id in problems:
+            task_id_list = [f"HumanEval/{i}" for i in range(120,164)]
+            for task_id in task_id_list:
                 task_data = problems[task_id]
                 task_prompt = task_data["prompt"]
                 reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, max_trials)
@@ -65,7 +66,7 @@ def reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, max_trial
 
         # action phase
         action_prompt = CODE_PROMPT_TEMPLATE.format(
-            reflection=f"previous reflections: {current_reflection}\n" if current_reflection else "",
+            reflection=f"reflections based on past failures:\n {current_reflection}\n" if current_reflection else "",
             task_prompt =task_prompt
         ).strip()
         log.info("ACTION PROMPT: ---------------------------\n %s \n", action_prompt)
@@ -113,7 +114,9 @@ def reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, max_trial
 
             if vector_memory:
                 add_reflection(reflection)
-                current_reflection = '\n'.join(search(reflection)["documents"][0])
+                res = search(reflection)["documents"][0]
+                bug_types = get_top_k_bugs(res, 3)
+                current_reflection = create_injection(list(bug_types.keys()))
             else:
                 current_reflection = reflection
             
@@ -135,7 +138,6 @@ if __name__=="__main__":
 
     # for independent runs
     task_id_list = [f"HumanEval/{i}" for i in range(100,110)]
-    print(task_id_list)
     MAX_TRIALS=3
 
     for TASK_ID in task_id_list:
