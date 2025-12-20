@@ -53,9 +53,14 @@ def human_eval_loop(llm, log_results, vector_memory, max_trials):
             task_prompt = task_data["prompt"]
             reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, max_trials)
 
+def get_reflections(prompt):
+    res = search(prompt)["documents"][0]
+    bug_types = get_top_k_bugs(res, 3)
+    return create_injection(list(bug_types.keys()))
+    
 
 def reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, max_trials):
-    current_reflection = ""
+    current_reflection = get_reflections(task_prompt)
     is_solved = False
     all_attempts = []
 
@@ -66,7 +71,7 @@ def reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, max_trial
 
         # action phase
         action_prompt = CODE_PROMPT_TEMPLATE.format(
-            reflection=f"reflections based on past failures:\n {current_reflection}\n" if current_reflection else "",
+            reflection=f"reflections based on past failures:\n-{current_reflection}\n" if current_reflection else "",
             task_prompt =task_prompt
         ).strip()
         log.info("ACTION PROMPT: ---------------------------\n %s \n", action_prompt)
@@ -114,9 +119,7 @@ def reflexion_run(llm, task_id, task_data, task_prompt, vector_memory, max_trial
 
             if vector_memory:
                 add_reflection(reflection)
-                res = search(reflection)["documents"][0]
-                bug_types = get_top_k_bugs(res, 3)
-                current_reflection = create_injection(list(bug_types.keys()))
+                current_reflection = get_reflections(reflection)
             else:
                 current_reflection = reflection
             
