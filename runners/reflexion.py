@@ -19,6 +19,7 @@ log = get_logger()
 samples = []
 
 problems = read_problems()
+tasks = {"start":0,"end":164}    # 0 - 164
 
 def human_eval_loop(llm, log_results, vector_memory, max_trials):
     if log_results:
@@ -28,7 +29,7 @@ def human_eval_loop(llm, log_results, vector_memory, max_trials):
             "a"
         ) as run_log:
         
-            task_id_list = [f"HumanEval/{i}" for i in range(120,164)]
+            task_id_list = [f"HumanEval/{i}" for i in range(tasks["start"],tasks["end"])]
             for task_id in task_id_list:
                 task_data = problems[task_id]
                 task_prompt = task_data["prompt"]

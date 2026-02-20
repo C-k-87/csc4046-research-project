@@ -55,8 +55,13 @@ def vanilla_run(llm, max_trials):
         for _ in range(max_trials)
     ]
 
-    with open("runtime_logs/vanilla_samples.jsonl", "a") as run_log:
-                os.makedirs("runtime_logs", exist_ok=True)
+    directory = "runtime_logs"
+    if not os.path.exists(directory):
+        os.makedirs(directory, exist_ok=True) # Creates directories recursively
+
+    file_path = f"{directory}/vanilla_samples.jsonl"
+
+    with open(file_path, "a") as run_log:
                 entry = str(samples[len(samples)-1])
                 run_log.write(entry+",\n")
                 run_log.close()

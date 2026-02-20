@@ -1,6 +1,6 @@
 from utils.local_llm import LocalLLM
 from runners.reflexion import human_eval_loop
-# from runners.vanilla import vanilla_run
+from runners.vanilla import vanilla_run
 
 # --- LLM Specifications ---
 
@@ -16,3 +16,4 @@ llm = LocalLLM(llm_model, n_ctx, n_gpu_layers, verbosity)
 # ---------------------------
 
 human_eval_loop(llm, logging, vector_memory, max_trials=3)
+# vanilla_run(llm, max_trials=3)
