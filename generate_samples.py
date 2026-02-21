@@ -9,7 +9,7 @@ n_ctx=4096
 n_gpu_layers=999
 verbosity = False
 logging =True
-vector_memory =True
+vector_memory =False
 
 llm = LocalLLM(llm_model, n_ctx, n_gpu_layers, verbosity)
 

@@ -11,13 +11,9 @@ data_path = Path("data/entries.jsonl")
 model = SentenceTransformer("transformer/bge-code-v1")
 K_VALUE=3
 
-chroma_client = chromadb.Client(
-    Settings(
-        anonymized_telemetry=False,
-        allow_reset=True
-    )
-)
-collection = chroma_client.create_collection(name='reflections')
+persist_dir='data/persist'
+chroma_client = chromadb.PersistentClient(path=persist_dir)
+collection = chroma_client.get_or_create_collection(name='reflections')
 
 def embed(text):
     return model.encode([text], normalize_embeddings=True)[0].tolist()
