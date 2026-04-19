@@ -1,0 +1,74 @@
+[
+    {
+        "run_id": "Phi-3-mini-4k-instruct-q4_reflexion_0",
+        "model": "Phi-3-mini-4k-instruct-q4",
+        "memory_type": "reflexion",
+        "embedding_model": "all-mini-LLM-v3",
+        "k_value": "3",
+        "run_results": {
+            "solved": "115",
+            "pass@1": "99",
+            "pass@3": "4",
+            "avg_iterations": "1.174"
+        }
+    },
+    {
+        "run_id": "Phi-3-mini-4k-instruct-q4_reflexion_1",
+        "model": "Phi-3-mini-4k-instruct-q4",
+        "memory_type": "reflexion",
+        "embedding_model": "all-mini-LLM-v3",
+        "k_value": "3",
+        "run_results": {
+            "solved": "105",
+            "pass@1": "89",
+            "pass@3": "8",
+            "avg_iterations": "1.229"
+        }
+    },
+    {
+        "run_id": "Gemma 2 2b It_reflexion_2",
+        "model": "Gemma 2 2b It",
+        "memory_type": "reflexion",
+        "embedding_model": "all-mini-LLM-v3",
+        "k_value": "3",
+        "run_results": {
+            "solved": "79",
+            "pass@1": "66",
+            "pass@3": "4",
+            "avg_iterations": "1.215"
+        }
+    },
+    {
+        "run_id": "Phi-3-mini-4k-instruct-q4_reflexion_3",
+        "model": "Phi-3-mini-4k-instruct-q4",
+        "memory_type": "reflexion",
+        "embedding_model": "all-mini-LLM-v3",
+        "k_value": "3",
+        "run_results": {
+            "solved": "110",
+            "pass@1": "89",
+            "pass@3": "5",
+            "avg_iterations": "1.236"
+        }
+    },
+    {
+        "run_id": "Phi-3-mini-4k-instruct-q4_reflexion_4",
+        "model": "Phi-3-mini-4k-instruct-q4",
+        "memory_type": "reflexion",
+        "embedding_model": "all-mini-LLM-v3",
+        "k_value": "3",
+        "run_results": {
+            "solved": "104",
+            "pass@1": "83",
+            "pass@3": "9",
+            "avg_iterations": "1.288"
+        }
+    },
+    {
+        "means": "reflexion",
+        "solved": 102.6,
+        "pass@1": 87.8,
+        "pass@3": 6.0,
+        "avg_iterations": 1.2284
+    }
+]

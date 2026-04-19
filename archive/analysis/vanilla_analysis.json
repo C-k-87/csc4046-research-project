@@ -1,0 +1,29 @@
+[
+    {
+        "run_id": "Phi-3-mini-4k-instruct-q4_vanilla_0",
+        "model": "Phi-3-mini-4k-instruct-q4",
+        "k_value": "3",
+        "run_results": {
+            "solved": "19",
+            "pass@1": "11",
+            "pass@3": "5"
+        }
+    },
+    {
+        "run_id": "Gemma 2 2b It_vanilla_1",
+        "model": "Gemma 2 2b It",
+        "k_value": "3",
+        "run_results": {
+            "solved": "0",
+            "pass@1": "0",
+            "pass@3": "0"
+        }
+    },
+    {
+        "means": "vanilla",
+        "solved": 9.5,
+        "pass@1": 5.5,
+        "pass@3": 2.5,
+        "avg_iterations": 1.2284
+    }
+]
