@@ -1,0 +1,113 @@
+[
+    {
+        "run_id": "Phi-3-mini-4k-instruct-q4_vector_mem_0",
+        "model": "Phi-3-mini-4k-instruct-q4",
+        "memory_type": "vector_mem",
+        "embedding_model": "all-mini-LLM-v3",
+        "k_value": "3",
+        "run_results": {
+            "solved": "106",
+            "pass@1": "91",
+            "pass@3": "3",
+            "avg_iterations": "1.170"
+        }
+    },
+    {
+        "run_id": "Phi3_vector_mem_1",
+        "model": "Phi3",
+        "memory_type": "vector_mem",
+        "embedding_model": "all-mini-LLM-v3",
+        "k_value": "3",
+        "run_results": {
+            "solved": "109",
+            "pass@1": "87",
+            "pass@3": "7",
+            "avg_iterations": "1.266"
+        }
+    },
+    {
+        "run_id": "Phi-3-mini-4k-instruct-q4_vector_mem_2",
+        "model": "Phi-3-mini-4k-instruct-q4",
+        "memory_type": "vector_mem",
+        "embedding_model": "all-mini-LLM-v3",
+        "k_value": "3",
+        "run_results": {
+            "solved": "107",
+            "pass@1": "79",
+            "pass@3": "6",
+            "avg_iterations": "1.318"
+        }
+    },
+    {
+        "run_id": "Phi-3-mini-4k-instruct-q4_vector_mem_3",
+        "model": "Phi-3-mini-4k-instruct-q4",
+        "memory_type": "vector_mem",
+        "embedding_model": "all-mini-LLM-v3",
+        "k_value": "3",
+        "run_results": {
+            "solved": "111",
+            "pass@1": "85",
+            "pass@3": "9",
+            "avg_iterations": "1.315"
+        }
+    },
+    {
+        "run_id": "Phi-3-mini-4k-instruct-q4_vector_mem_4",
+        "model": "Phi-3-mini-4k-instruct-q4",
+        "memory_type": "vector_mem",
+        "embedding_model": "all-mini-LLM-v3",
+        "k_value": "3",
+        "run_results": {
+            "solved": "92",
+            "pass@1": "92",
+            "pass@3": "0",
+            "avg_iterations": "1.000"
+        }
+    },
+    {
+        "run_id": "Phi-3-mini-4k-instruct-q4_vector_mem_5",
+        "model": "Phi-3-mini-4k-instruct-q4",
+        "memory_type": "vector_mem",
+        "embedding_model": "all-mini-LLM-v3",
+        "k_value": "3",
+        "run_results": {
+            "solved": "105",
+            "pass@1": "93",
+            "pass@3": "3",
+            "avg_iterations": "1.143"
+        }
+    },
+    {
+        "run_id": "Phi-3-mini-4k-instruct-q4_vector_mem_6",
+        "model": "Phi-3-mini-4k-instruct-q4",
+        "memory_type": "vector_mem",
+        "embedding_model": "all-mini-LLM-v3",
+        "k_value": "3",
+        "run_results": {
+            "solved": "105",
+            "pass@1": "93",
+            "pass@3": "3",
+            "avg_iterations": "1.143"
+        }
+    },
+    {
+        "run_id": "Gemma 2 2b It_vector_mem_7",
+        "model": "Gemma 2 2b It",
+        "memory_type": "vector_mem",
+        "embedding_model": "all-mini-LLM-v3",
+        "k_value": "3",
+        "run_results": {
+            "solved": "74",
+            "pass@1": "63",
+            "pass@3": "2",
+            "avg_iterations": "1.176"
+        }
+    },
+    {
+        "means": "vector",
+        "solved": 101.125,
+        "pass@1": 85.375,
+        "pass@3": 4.125,
+        "avg_iterations": 1.1913
+    }
+]
